@@ -125,7 +125,7 @@ void add_task(struct todo *todo_list, int num_of_tasks)
 
 void delete_task(struct todo *todo_list, int num_of_tasks)
 {
-    FILE *f, *tmp;
+    FILE *f;
     char buf[100];
     int task_tobe_deleted;
 
@@ -134,7 +134,10 @@ void delete_task(struct todo *todo_list, int num_of_tasks)
     fscanf(stdin, "%s", buf);
     task_tobe_deleted = atoi(buf);
 
-    f = fopen(FILE_NAME, "w");
+    if (!(f = fopen(FILE_NAME, "w"))) {
+        fprintf(stderr, "file not found");
+        exit(EXIT_FAILURE);
+    }
     for (int i = 0; i < num_of_tasks; i++) {
         if ((todo_list+i)->num != (task_tobe_deleted-1)) {
             fprintf(f, "%s\n", (todo_list+i)->content);
