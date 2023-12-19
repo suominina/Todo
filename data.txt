@@ -1,5 +1,0 @@
-task
-right
-left
-up
-do
