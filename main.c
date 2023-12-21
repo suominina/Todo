@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
 #define FILE_NAME "data.txt"
 
@@ -59,17 +60,19 @@ int main(int argc, char **argv)
 
 int initialize_todo_list(struct todo *todo_list) {
     FILE *f;
+    char buf[1024];
     if (!(f = fopen(FILE_NAME, "r"))) {
         fprintf(stderr, "file not found");
         exit(EXIT_FAILURE);
     }
 
     int i = 0;
-    fseek(f, 0, SEEK_SET);
-    while(fscanf(f, "%s", (todo_list+i)->content) != EOF) {
+    while ((fgets(buf, sizeof(buf), f)) != NULL) {
+        strcpy((todo_list+i)->content, buf);
         (todo_list+i)->num = i;
         i++;
     }
+
     return i;
 }
 
@@ -96,8 +99,8 @@ void show_tasks(struct todo *todo_list)
     char buf[1024];
     int i = 1;
     while (fgets(buf, sizeof buf, f) != NULL) {
-        fprintf(stdout, "%d: ", i);
-        fprintf(stdout, buf);
+        fprintf(stdout, "%d ", i);
+        fputs(buf, stdout);
         i++;
     }
 
@@ -107,18 +110,22 @@ void show_tasks(struct todo *todo_list)
 void add_task(struct todo *todo_list, int num_of_tasks)
 {
     FILE *f;
+    char buf[1024];
     if (!(f = fopen(FILE_NAME, "a"))) {
         fprintf(stderr, "file not found");
         exit(EXIT_FAILURE);
     }
 
-    int idx = sizeof todo_list;
+    int idx = num_of_tasks;
 
-    fprintf(stdout, "> ");
-    fscanf(stdin, "%s", (todo_list+idx)->content);
+    fflush(stdin); // fgets() doesnt work without this
+    printf("> ");
+    fgets(buf, sizeof(buf), stdin);
+    strcpy((todo_list+idx)->content, buf);
     (todo_list+idx)->num = num_of_tasks+1;
+    fprintf(f, "%s", (todo_list+idx)->content);
 
-    fprintf(f, "%s\n", (todo_list+idx)->content);
+    puts("added a new task");
 
     fclose(f);
 }
@@ -140,7 +147,7 @@ void delete_task(struct todo *todo_list, int num_of_tasks)
     }
     for (int i = 0; i < num_of_tasks; i++) {
         if ((todo_list+i)->num != (task_tobe_deleted-1)) {
-            fprintf(f, "%s\n", (todo_list+i)->content);
+            fprintf(f, "%s", (todo_list+i)->content);
         }
     }
 
