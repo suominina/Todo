@@ -118,7 +118,7 @@ void add_task(struct todo *todo_list, int num_of_tasks)
 
     int idx = num_of_tasks;
 
-    fflush(stdin); // fgets() doesnt work without this
+    fflush(stdin);
     printf("> ");
     fgets(buf, sizeof(buf), stdin);
     strcpy((todo_list+idx)->content, buf);
